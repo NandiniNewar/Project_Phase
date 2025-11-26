@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentimentScope | AI-Powered Review Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --white: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Authentication Styles */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        }
+        
+        .auth-box {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .auth-header h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .auth-header p {
+            color: var(--gray);
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray);
+            transition: all 0.3s;
+        }
+        
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e11574;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-error {
+            background: rgba(230, 57, 70, 0.1);
+            border: 1px solid #e63946;
+            color: #e63946;
+        }
+        
+        .alert-success {
+            background: rgba(76, 201, 240, 0.1);
+            border: 1px solid #4cc9f0;
+            color: #4cc9f0;
+        }
+        
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 30px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 1rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-links a.active {
+            color: var(--primary);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+            width: 150px;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .dropdown-menu.active {
+            display: block;
+        }
+        
+        .dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .dropdown-item:hover {
+            background: var(--light);
+        }
+        
+        .dropdown-item i {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 30px 0;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .page-header p {
+            color: var(--gray);
+            max-width: 600px;
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .stat-positive {
+            background: rgba(76, 201, 240, 0.2);
+            color: #4cc9f0;
+        }
+        
+        .stat-negative {
+            background: rgba(230, 57, 70, 0.2);
+            color: #e63946;
+        }
+        
+        .stat-neutral {
+            background: rgba(248, 150, 30, 0.2);
+            color: #f8961e;
+        }
+        
+        .stat-info {
+            background: rgba(67, 97, 238, 0.2);
+            color: var(--primary);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Charts */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .chart-header h3 {
+            color: var(--primary);
+        }
+        
+        /* Review List */
+        .review-list {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .review-card {
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .review-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .reviewer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .reviewer-name {
+            font-weight: 600;
+        }
+        
+        .review-date {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .sentiment-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .sentiment-score {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        
+        .sentiment-positive {
+            background: #4cc9f0;
+        }
+        
+        .sentiment-neutral {
+            background: #f8961e;
+        }
+        
+        .sentiment-negative {
+            background: #e63946;
+        }
+        
+        .review-content {
+            margin-bottom: 15px;
+        }
+        
+        .review-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .review-tags {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .tag {
+            background: var(--light);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .rating {
+            color: gold;
+        }
+        
+        /* Analysis Page */
+        .analysis-controls {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .analysis-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .emotional-breakdown {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .aspect-analysis {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .aspect-bar {
+            margin-bottom: 15px;
+        }
+        
+        .aspect-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .aspect-bar-container {
+            height: 10px;
+            background: var(--light-gray);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .aspect-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+        }
+        
+        .aspect-positive {
+            background: #4cc9f0;
+        }
+        
+        .aspect-negative {
+            background: #e63946;
+        }
+        
+        /* Comparison Page */
+        .hotel-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .comparison-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .comparison-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .improvement-suggestions {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+        
+        .suggestion-list {
+            list-style-type: none;
+        }
+        
+        .suggestion-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+        }
+        
+        .suggestion-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .suggestion-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 0.8rem;
+        }
+        
+        /* Insights Page */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .insight-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .insight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .insight-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .charts-row, .analysis-results, .hotel-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-links {
+                gap: 15px;
+                margin: 15px 0;
+            }
+            
+            .nav-links li {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Section -->
+    <div class="auth-container" id="auth-section">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1><i class="fas fa-chart-line"></i> SentimentScope</h1>
+                <p>AI-powered analysis for customer reviews</p>
+            </div>
+            
+            <div class="alert alert-error" id="auth-error">
+                <i class="fas fa-exclamation-circle"></i> <span id="error-message">Invalid credentials. Please try again.</span>
+            </div>
+            
+            <div class="alert alert-success" id="auth-success">
+                <i class="fas fa-check-circle"></i> <span id="success-message">Registration successful! Please login.</span>
+            </div>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">Login</div>
+                <div class="auth-tab" data-tab="register">Register</div>
+            </div>
+            
+            <form class="auth-form active" id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <p>Don't have an account? <a href="#" id="show-register" style="color: var(--primary);">Register here</a></p>
+                </div>
+            </form>
+            
+            <form class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label for="register-name">Full Name</label>
+                    <input type="text" id="register-name" class="form-control" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" class="form-control" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" class="form-control" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm">Confirm Password</label>
+                    <input type="password" id="register-confirm" class="form-control" placeholder="Confirm your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Register</button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <p>Already have an account? <a href="#" id="show-login" style="color: var(--primary);">Login here</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Dashboard Section -->
+    <div class="dashboard" id="dashboard">
+        <header>
+            <div class="container">
+                <nav class="navbar">
+                    <div class="logo">
+                        <i class="fas fa-chart-line"></i>
+                        SentimentScope
+                    </div>
+                    <ul class="nav-links">
+                        <li><a href="#" class="nav-link active" data-page="dashboard-page">Dashboard</a></li>
+                        <li><a href="#" class="nav-link" data-page="analyze-page">Analyze</a></li>
+                        <li><a href="#" class="nav-link" data-page="compare-page">Compare</a></li>
+                        <li><a href="#" class="nav-link" data-page="insights-page">Insights</a></li>
+                    </ul>
+                    <div class="user-menu">
+                        <div class="user-avatar" id="user-avatar">JD</div>
+                        <span id="user-name">John Doe</span>
+                        <div class="dropdown-menu" id="dropdown-menu">
+                            <div class="dropdown-item" id="profile-btn">
+                                <i class="fas fa-user"></i> Profile
+                            </div>
+                            <div class="dropdown-item" id="settings-btn">
+                                <i class="fas fa-cog"></i> Settings
+                            </div>
+                            <div class="dropdown-item" id="logout-btn">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="container">
+                <!-- Dashboard Page -->
+                <div class="page active" id="dashboard-page">
+                    <div class="page-header">
+                        <h1>Dashboard</h1>
+                        <p>Overview of hotel review sentiment analysis</p>
+                    </div>
+                    
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <div class="stat-icon stat-positive">
+                                <i class="fas fa-smile"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value" id="positive-count">64%</div>
+                                <div class="stat-label">Positive Reviews</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-negative">
+                                <i class="fas fa-frown"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value" id="negative-count">18%</div>
+                                <div class="stat-label">Negative Reviews</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-neutral">
+                                <i class="fas fa-meh"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value" id="neutral-count">18%</div>
+                                <div class="stat-label">Neutral Reviews</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-info">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value" id="total-reviews">1,247</div>
+                                <div class="stat-label">Total Reviews</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="charts-row">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3>Sentiment Trend</h3>
+                                <select id="trend-period">
+                                    <option value="7d">Last 7 Days</option>
+                                    <option value="30d">Last 30 Days</option>
+                                    <option value="90d">Last 90 Days</option>
+                                </select>
+                            </div>
+                            <canvas id="sentimentTrendChart" height="250"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3>Sentiment Distribution</h3>
+                            </div>
+                            <canvas id="sentimentDistributionChart" height="250"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="review-list">
+                        <div class="chart-header">
+                            <h3>Recent Reviews</h3>
+                            <button class="btn btn-primary" style="width: auto; padding: 8px 15px;">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        
+                        <div id="reviews-container">
+                            <!-- Reviews will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analyze Page -->
+                <div class="page" id="analyze-page">
+                    <div class="page-header">
+                        <h1>Analyze Reviews</h1>
+                        <p>Deep dive into customer sentiment and emotional breakdown</p>
+                    </div>
+                    
+                    <div class="analysis-controls">
+                        <div class="control-group">
+                            <label for="hotel-select">Select Hotel</label>
+                            <select id="hotel-select" class="form-control">
+                                <option value="grand-plaza">Grand Plaza Hotel</option>
+                                <option value="oasis-resort">Oasis Resort</option>
+                                <option value="urban-suites">Urban Suites</option>
+                                <option value="harbor-view">Harbor View Inn</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="time-period">Time Period</label>
+                            <select id="time-period" class="form-control">
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d" selected>Last 30 Days</option>
+                                <option value="90d">Last 90 Days</option>
+                                <option value="1y">Last Year</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-results">
+                        <div class="emotional-breakdown">
+                            <h3>Emotional Breakdown</h3>
+                            <canvas id="emotionChart" height="300"></canvas>
+                        </div>
+                        
+                        <div class="aspect-analysis">
+                            <h3>Aspect-based Sentiment</h3>
+                            <div class="aspect-bar">
+                                <div class="aspect-label">
+                                    <span>Room Service</span>
+                                    <span>72% Positive</span>
+                                </div>
+                                <div class="aspect-bar-container">
+                                    <div class="aspect-bar-fill aspect-positive" style="width: 72%"></div>
+                                </div>
+                            </div>
+                            <div class="aspect-bar">
+                                <div class="aspect-label">
+                                    <span>Food Quality</span>
+                                    <span>65% Positive</span>
+                                </div>
+                                <div class="aspect-bar-container">
+                                    <div class="aspect-bar-fill aspect-positive" style="width: 65%"></div>
+                                </div>
+                            </div>
+                            <div class="aspect-bar">
+                                <div class="aspect-label">
+                                    <span>Value for Money</span>
+                                    <span>58% Positive</span>
+                                </div>
+                                <div class="aspect-bar-container">
+                                    <div class="aspect-bar-fill aspect-positive" style="width: 58%"></div>
+                                </div>
+                            </div>
+                            <div class="aspect-bar">
+                                <div class="aspect-label">
+                                    <span>Cleanliness</span>
+                                    <span>81% Positive</span>
+                                </div>
+                                <div class="aspect-bar-container">
+                                    <div class="aspect-bar-fill aspect-positive" style="width: 81%"></div>
+                                </div>
+                            </div>
+                            <div class="aspect-bar">
+                                <div class="aspect-label">
+                                    <span>Ambiance</span>
+                                    <span>76% Positive</span>
+                                </div>
+                                <div class="aspect-bar-container">
+                                    <div class="aspect-bar-fill aspect-positive" style="width: 76%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Compare Page -->
+                <div class="page" id="compare-page">
+                    <div class="page-header">
+                        <h1>Compare Hotels</h1>
+                        <p>Benchmark your hotel against competitors</p>
+                    </div>
+                    
+                    <div class="hotel-comparison">
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <h3>Your Hotel</h3>
+                                <p>Grand Plaza Hotel</p>
+                            </div>
+                            <div class="aspect-analysis">
+                                <div class="aspect-bar">
+                                    <div class="aspect-label">
+                                        <span>Food Quality</span>
+                                        <span>65%</span>
+                                    </div>
+                                    <div class="aspect-bar-container">
+                                        <div class="aspect-bar-fill aspect-positive" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                                <div class="aspect-bar">
+                                    <div class="aspect-label">
+                                        <span>Ambiance</span>
+                                        <span>76%</span>
+                                    </div>
+                                    <div class="aspect-bar-container">
+                                        <div class="aspect-bar-fill aspect-positive" style="width: 76%"></div>
+                                    </div>
+                                </div>
+                                <div class="aspect-bar">
+                                    <div class="aspect-label">
+                                        <span>Cleanliness</span>
+                                        <span>81%</span>
+                                    </div>
+                                    <div class="aspect-bar-container">
+                                        <div class="aspect-bar-fill aspect-positive" style="width: 81%"></div>
+                                    </div>
+                                </div>
+                                <div class="aspect-bar">
+                                    <div class="aspect-label">
+                                        <span>Value for Money</span>
+                                        <span>58%</span>
+                                    </div>
+                                    <div class="aspect-bar-container">
+                                        <div class="aspect-bar-fill aspect-positive" style="width: 58%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <h3>Competitor</h3>
+                                <p>Oasis Resort</p>
+                            </div>
+                            <div class="aspect-analysis">
+                                <div class="aspect-bar">
+                                    <div class="aspect-label">
+                                        <span>Food Quality</span>
+                                        <span>78%</span>
+                                    </div>
+                                    <div class="aspect-bar-container">
+                                        <div class="aspect-bar-fill aspect-positive" style="width: 78%"></div>
+                                    </div>
+                                </div>
+                                <div class="aspect-bar">
+                                    <div class="aspect-label">
+                                        <span>Ambiance</span>
+                                        <span>82%</span>
+                                    </div>
+                                    <div class="aspect-bar-container">
+                                        <div class="aspect-bar-fill aspect-positive" style="width: 82%"></div>
+                                    </div>
+                                </div>
+                                <div class="aspect-bar">
+                                    <div class="aspect-label">
+                                        <span>Cleanliness</span>
+                                        <span>85%</span>
+                                    </div>
+                                    <div class="aspect-bar-container">
+                                        <div class="aspect-bar-fill aspect-positive" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                <div class="aspect-bar">
+                                    <div class="aspect-label">
+                                        <span>Value for Money</span>
+                                        <span>72%</span>
+                                    </div>
+                                    <div class="aspect-bar-container">
+                                        <div class="aspect-bar-fill aspect-positive" style="width: 72%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="improvement-suggestions">
+                        <h3>Improvement Suggestions</h3>
+                        <ul class="suggestion-list">
+                            <li>
+                                <div class="suggestion-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div>
+                                    <strong>Food Quality:</strong> Improve variety and presentation of breakfast buffet based on competitor analysis
+                                </div>
+                            </li>
+                            <li>
+                                <div class="suggestion-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div>
+                                    <strong>Value for Money:</strong> Consider offering more inclusive packages or seasonal discounts
+                                </div>
+                            </li>
+                            <li>
+                                <div class="suggestion-icon">
+                                    <i class="fas fa-spa"></i>
+                                </div>
+                                <div>
+                                    <strong>Ambiance:</strong> Enhance lobby area with more comfortable seating and better lighting
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Insights Page -->
+                <div class="page" id="insights-page">
+                    <div class="page-header">
+                        <h1>Actionable Insights</h1>
+                        <p>Key findings and recommendations for improvement</p>
+                    </div>
+                    
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <div class="insight-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <h3>Food Quality Insights</h3>
+                            </div>
+                            <p>Guests frequently mention the limited variety in the breakfast buffet. Consider adding more international options and fresh fruit selections.</p>
+                            <div class="review-tags" style="margin-top: 15px;">
+                                <span class="tag">35% of negative reviews</span>
+                                <span class="tag">Priority: High</span>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <div class="insight-icon">
+                                    <i class="fas fa-concierge-bell"></i>
+                                </div>
+                                <h3>Service Improvement</h3>
+                            </div>
+                            <p>Staff responsiveness during peak hours needs improvement. Consider additional training for front desk and room service teams.</p>
+                            <div class="review-tags" style="margin-top: 15px;">
+                                <span class="tag">28% of negative reviews</span>
+                                <span class="tag">Priority: Medium</span>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <div class="insight-icon">
+                                    <i class="fas fa-soap"></i>
+                                </div>
+                                <h3>Cleanliness Standards</h3>
+                            </div>
+                            <p>Bathroom cleanliness receives consistently positive feedback. Maintain these high standards across all rooms.</p>
+                            <div class="review-tags" style="margin-top: 15px;">
+                                <span class="tag">81% positive rating</span>
+                                <span class="tag">Strength to maintain</span>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <div class="insight-icon">
+                                    <i class="fas fa-bed"></i>
+                                </div>
+                                <h3>Room Comfort</h3>
+                            </div>
+                            <p>Guests appreciate the comfortable beds but mention that room temperatures are difficult to control. Consider upgrading thermostat systems.</p>
+                            <div class="review-tags" style="margin-top: 15px;">
+                                <span class="tag">42 mentions last month</span>
+                                <span class="tag">Priority: Medium</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample review data
+        const sampleReviews = [
+            {
+                id: 1,
+                reviewer: "John Doe",
+                date: "March 15, 2023",
+                content: "Absolutely loved our stay at the Grand Plaza! The staff was incredibly friendly and the room was spacious with a beautiful view. The breakfast buffet had a great variety of options.",
+                sentiment: "positive",
+                rating: 5,
+                tags: ["Staff", "Room", "Breakfast"]
+            },
+            {
+                id: 2,
+                reviewer: "Sarah Johnson",
+                date: "March 12, 2023",
+                content: "The hotel was okay for the price. The location is convenient but the rooms are a bit dated. The bed was comfortable but the bathroom could use an update. Service was average.",
+                sentiment: "neutral",
+                rating: 3,
+                tags: ["Location", "Room Quality", "Service"]
+            },
+            {
+                id: 3,
+                reviewer: "Michael Roberts",
+                date: "March 10, 2023",
+                content: "Very disappointed with our stay. The air conditioning was broken and the staff was unhelpful when we complained. The room wasn't clean and we found hair in the bathroom. Would not recommend.",
+                sentiment: "negative",
+                rating: 1,
+                tags: ["Cleanliness", "Staff", "Facilities"]
+            },
+            {
+                id: 4,
+                reviewer: "Emily Chen",
+                date: "March 8, 2023",
+                content: "Excellent service from check-in to check-out. The concierge provided great recommendations for local restaurants. The pool area was clean and well-maintained.",
+                sentiment: "positive",
+                rating: 5,
+                tags: ["Service", "Pool", "Concierge"]
+            }
+        ];
+
+        // DOM Elements
+        const authSection = document.getElementById('auth-section');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page');
+        const reviewsContainer = document.getElementById('reviews-container');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        const logoutBtn = document.getElementById('logout-btn');
+        const authError = document.getElementById('auth-error');
+        const authSuccess = document.getElementById('auth-success');
+        const showRegister = document.getElementById('show-register');
+        const showLogin = document.getElementById('show-login');
+
+        // Authentication Tabs
+        authTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                
+                authTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                document.querySelectorAll('.auth-form').forEach(form => {
+                    form.classList.remove('active');
+                });
+                
+                document.getElementById(`${tabName}-form`).classList.add('active');
+                
+                // Hide alerts when switching tabs
+                hideAlerts();
+            });
+        });
+
+        // Show register form
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            authTabs.forEach(t => t.classList.remove('active'));
+            document.querySelector('[data-tab="register"]').classList.add('active');
+            
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            
+            document.getElementById('register-form').classList.add('active');
+            hideAlerts();
+        });
+
+        // Show login form
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            authTabs.forEach(t => t.classList.remove('active'));
+            document.querySelector('[data-tab="login"]').classList.add('active');
+            
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            
+            document.getElementById('login-form').classList.add('active');
+            hideAlerts();
+        });
+
+        // Hide alerts
+        function hideAlerts() {
+            authError.style.display = 'none';
+            authSuccess.style.display = 'none';
+        }
+
+        // Show error alert
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            authError.style.display = 'block';
+            authSuccess.style.display = 'none';
+        }
+
+        // Show success alert
+        function showSuccess(message) {
+            document.getElementById('success-message').textContent = message;
+            authSuccess.style.display = 'block';
+            authError.style.display = 'none';
+        }
+
+        // Login Form Submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Simple validation
+            if (email && password) {
+                // Check if user exists
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    // Store current user data
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    
+                    // Show dashboard
+                    authSection.style.display = 'none';
+                    dashboard.style.display = 'block';
+                    
+                    // Update user info
+                    updateUserInfo(user);
+                    
+                    // Initialize charts and data
+                    initializeDashboard();
+                } else {
+                    showError("Invalid email or password. Please try again or register if you don't have an account.");
+                }
+            } else {
+                showError("Please fill in all fields.");
+            }
+        });
+
+        // Register Form Submission
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm').value;
+            
+            // Simple validation
+            if (name && email && password) {
+                if (password !== confirm) {
+                    showError("Passwords do not match.");
+                    return;
+                }
+                
+                // Check if user already exists
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const existingUser = users.find(u => u.email === email);
+                
+                if (existingUser) {
+                    showError("An account with this email already exists. Please login.");
+                    return;
+                }
+                
+                // Create new user
+                const user = {
+                    name: name,
+                    email: email,
+                    password: password
+                };
+                
+                // Save user to localStorage
+                users.push(user);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                showSuccess("Registration successful! Please login with your credentials.");
+                
+                // Switch to login form
+                setTimeout(() => {
+                    authTabs.forEach(t => t.classList.remove('active'));
+                    document.querySelector('[data-tab="login"]').classList.add('active');
+                    
+                    document.querySelectorAll('.auth-form').forEach(form => {
+                        form.classList.remove('active');
+                    });
+                    
+                    document.getElementById('login-form').classList.add('active');
+                    
+                    // Pre-fill email
+                    document.getElementById('login-email').value = email;
+                    
+                    hideAlerts();
+                }, 2000);
+            } else {
+                showError("Please fill in all fields.");
+            }
+        });
+
+        // Navigation
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pageId = link.getAttribute('data-page');
+                
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+            });
+        });
+
+        // User menu toggle
+        userAvatar.addEventListener('click', () => {
+            dropdownMenu.classList.toggle('active');
+        });
+
+        // Logout functionality
+        logoutBtn.addEventListener('click', () => {
+            // Clear current user
+            localStorage.removeItem('currentUser');
+            
+            // Hide dashboard
+            dashboard.style.display = 'none';
+            
+            // Show auth section
+            authSection.style.display = 'flex';
+            
+            // Reset forms
+            loginForm.reset();
+            registerForm.reset();
+            
+            // Hide dropdown
+            dropdownMenu.classList.remove('active');
+            
+            // Show login form
+            authTabs.forEach(t => t.classList.remove('active'));
+            document.querySelector('[data-tab="login"]').classList.add('active');
+            
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            
+            document.getElementById('login-form').classList.add('active');
+            
+            hideAlerts();
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                dropdownMenu.classList.remove('active');
+            }
+        });
+
+        // Update user information
+        function updateUserInfo(user) {
+            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            userAvatar.textContent = initials;
+            userName.textContent = user.name;
+        }
+
+        // Check if user is already logged in
+        function checkAuthStatus() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                authSection.style.display = 'none';
+                dashboard.style.display = 'block';
+                updateUserInfo(user);
+                initializeDashboard();
+            }
+        }
+
+        // Initialize dashboard with charts and data
+        function initializeDashboard() {
+            loadReviews();
+            initializeCharts();
+        }
+
+        // Load reviews into the dashboard
+        function loadReviews() {
+            reviewsContainer.innerHTML = '';
+            
+            sampleReviews.forEach(review => {
+                const reviewCard = document.createElement('div');
+                reviewCard.className = 'review-card';
+                
+                const sentimentClass = `sentiment-${review.sentiment}`;
+                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                
+                reviewCard.innerHTML = `
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar">${review.reviewer.split(' ').map(n => n[0]).join('')}</div>
+                            <div>
+                                <div class="reviewer-name">${review.reviewer}</div>
+                                <div class="review-date">${review.date}</div>
+                            </div>
+                        </div>
+                        <div class="sentiment-indicator">
+                            <span class="sentiment-score ${sentimentClass}">${review.sentiment.charAt(0).toUpperCase()}</span>
+                            <span>${review.sentiment.charAt(0).toUpperCase() + review.sentiment.slice(1)}</span>
+                        </div>
+                    </div>
+                    <div class="review-content">
+                        <p>${review.content}</p>
+                    </div>
+                    <div class="review-footer">
+                        <div class="review-tags">
+                            ${review.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="rating">
+                            ${stars}
+                        </div>
+                    </div>
+                `;
+                
+                reviewsContainer.appendChild(reviewCard);
+            });
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Sentiment Trend Chart
+            const trendCtx = document.getElementById('sentimentTrendChart').getContext('2d');
+            const trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [
+                        {
+                            label: 'Positive',
+                            data: [65, 59, 70, 71, 66, 64],
+                            borderColor: '#4cc9f0',
+                            backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Negative',
+                            data: [15, 20, 17, 15, 19, 18],
+                            borderColor: '#e63946',
+                            backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Neutral',
+                            data: [20, 21, 13, 14, 15, 18],
+                            borderColor: '#f8961e',
+                            backgroundColor: 'rgba(248, 150, 30, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Sentiment Distribution Chart
+            const distributionCtx = document.getElementById('sentimentDistributionChart').getContext('2d');
+            const distributionChart = new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Negative', 'Neutral'],
+                    datasets: [{
+                        data: [64, 18, 18],
+                        backgroundColor: [
+                            '#4cc9f0',
+                            '#e63946',
+                            '#f8961e'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+
+            // Emotion Chart
+            const emotionCtx = document.getElementById('emotionChart').getContext('2d');
+            const emotionChart = new Chart(emotionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Joy', 'Trust', 'Fear', 'Surprise', 'Sadness', 'Disgust', 'Anger', 'Anticipation'],
+                    datasets: [{
+                        label: 'Emotion Intensity',
+                        data: [75, 68, 25, 40, 22, 18, 15, 60],
+                        backgroundColor: [
+                            'rgba(76, 201, 240, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(248, 150, 30, 0.7)',
+                            'rgba(247, 37, 133, 0.7)',
+                            'rgba(58, 12, 163, 0.7)',
+                            'rgba(230, 57, 70, 0.7)',
+                            'rgba(101, 10, 105, 0.7)',
+                            'rgba(72, 149, 239, 0.7)'
+                        ],
+                        borderColor: [
+                            '#4cc9f0',
+                            '#4361ee',
+                            '#f8961e',
+                            '#f72585',
+                            '#3a0ca3',
+                            '#e63946',
+                            '#650a69',
+                            '#4895ef'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Check authentication status on page load
+        document.addEventListener('DOMContentLoaded', checkAuthStatus);
+    </script>
+</body>
+</html>
